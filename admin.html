@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin · ADSS RUHUNA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-extrabold text-lg">ADSS <span class="text-emerald-600">RUHUNA</span></a>
+      <nav>
+        <ul class="flex gap-3 text-sm font-semibold">
+          <li><a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-100">Home</a></li>
+          <li><a href="attend.html" class="px-3 py-2 rounded-md hover:bg-slate-100">Mark Attendance</a></li>
+          <li><a href="admin.html" class="px-3 py-2 rounded-md bg-emerald-50 text-emerald-700">Admin</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10">
+    <!-- LOGIN CARD -->
+    <section id="login-card" class="max-w-md mx-auto bg-white rounded-2xl border shadow-sm p-6">
+      <h1 class="text-xl font-bold">Admin Login</h1>
+      <p class="mt-2 text-sm text-slate-600">Default password on first run: <span class="font-semibold">admin123</span></p>
+      <form id="loginForm" class="mt-6 space-y-4">
+        <div>
+          <label class="block text-sm font-semibold">Password</label>
+          <input id="adminPass" type="password" required class="mt-1 w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="••••••••">
+        </div>
+        <button class="w-full rounded-lg bg-emerald-600 text-white font-semibold py-2.5 hover:bg-emerald-700">Login</button>
+      </form>
+      <p id="loginMsg" class="mt-3 text-sm text-rose-600 hidden"></p>
+    </section>
+
+    <!-- ADMIN PANEL -->
+    <section id="admin-panel" class="hidden">
+      <div class="grid md:grid-cols-3 gap-6 mt-8">
+        <!-- Event Setup -->
+        <div class="md:col-span-2 bg-white rounded-2xl border shadow-sm p-6">
+          <h2 class="text-lg font-bold">Event Setup</h2>
+          <form id="eventForm" class="mt-4 grid gap-4">
+            <div>
+              <label class="block text-sm font-semibold">Event Name</label>
+              <input id="evName" required class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div class="grid md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-semibold">Event Date</label>
+                <input id="evDate" type="date" required class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold">Start Time</label>
+                <input id="startTime" type="datetime-local" required class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold">End Time</label>
+                <input id="endTime" type="datetime-local" required class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+              </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold">Pass Key (for students)</label>
+                <input id="passKey" minlength="4" required class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500" placeholder="E.g. RUH21">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold">Sections (fixed)</label>
+                <input disabled value="SC/2021, SC/2022, SC/2023, SC/2024" class="mt-1 w-full rounded-lg border px-3 py-2 bg-slate-50">
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <button class="rounded-lg bg-emerald-600 text-white font-semibold px-4 py-2 hover:bg-emerald-700">Save Event</button>
+              <button id="endEvent" type="button" class="rounded-lg bg-rose-600 text-white font-semibold px-4 py-2 hover:bg-rose-700">End & Close Event</button>
+            </div>
+            <p id="eventMsg" class="text-sm mt-2"></p>
+          </form>
+        </div>
+
+        <!-- Admin Settings -->
+        <div class="bg-white rounded-2xl border shadow-sm p-6">
+          <h3 class="text-lg font-bold">Admin Settings</h3>
+          <form id="pwdForm" class="mt-4 space-y-3">
+            <div>
+              <label class="block text-sm font-semibold">Change Admin Password</label>
+              <input id="newPwd" type="password" minlength="6" class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500" placeholder="New password">
+            </div>
+            <button class="rounded-lg border font-semibold px-4 py-2 hover:bg-white">Update Password</button>
+            <p id="pwdMsg" class="text-sm mt-1"></p>
+          </form>
+
+          <hr class="my-6">
+
+          <div>
+            <h4 class="font-semibold">Current Event Snapshot</h4>
+            <dl class="mt-3 text-sm space-y-1">
+              <div class="flex justify-between"><dt class="text-slate-500">Name</dt><dd id="s_name" class="font-semibold">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">Date</dt><dd id="s_date" class="font-semibold">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">Start</dt><dd id="s_start" class="font-semibold">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">End</dt><dd id="s_end" class="font-semibold">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">Pass Key</dt><dd id="s_key" class="font-semibold">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">Total Local Entries</dt><dd id="s_count" class="font-semibold">0</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const ADMIN_PWD_KEY = 'adss_admin_password';
+    const EVENT_KEY = 'adss_current_event';
+
+    // Bootstrap default admin password
+    if (!localStorage.getItem(ADMIN_PWD_KEY)) {
+      localStorage.setItem(ADMIN_PWD_KEY, JSON.stringify({ password: 'admin123' }));
+    }
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = (d) => d ? new Date(d).toLocaleString() : '—';
+
+    // Login
+    $('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const saved = JSON.parse(localStorage.getItem(ADMIN_PWD_KEY) || '{}');
+      const ok = $('adminPass').value === saved.password;
+      if (!ok) {
+        $('loginMsg').textContent = 'Invalid password.';
+        $('loginMsg').classList.remove('hidden');
+        return;
+      }
+      $('login-card').classList.add('hidden');
+      $('admin-panel').classList.remove('hidden');
+      loadEvent();
+    });
+
+    // Load snapshot + form
+    function loadEvent() {
+      const ev = JSON.parse(localStorage.getItem(EVENT_KEY) || 'null');
+      if (ev) {
+        $('evName').value = ev.name || '';
+        $('evDate').value = ev.eventDate || '';
+        $('startTime').value = ev.startTime ? ev.startTime.slice(0,16) : '';
+        $('endTime').value = ev.endTime ? ev.endTime.slice(0,16) : '';
+        $('passKey').value = ev.passKey || '';
+      }
+      refreshSnapshot();
+    }
+
+    function refreshSnapshot() {
+      const ev = JSON.parse(localStorage.getItem(EVENT_KEY) || 'null');
+      $('s_name').textContent = ev?.name || '—';
+      $('s_date').textContent = ev?.eventDate || '—';
+      $('s_start').textContent = fmt(ev?.startTime);
+      $('s_end').textContent = fmt(ev?.endTime);
+      $('s_key').textContent = ev?.passKey || '—';
+      const id = ev ? (ev.id) : null;
+      const arr = id ? JSON.parse(localStorage.getItem('adss_attendance_' + id) || '[]') : [];
+      $('s_count').textContent = arr.length;
+    }
+
+    // Save Event
+    $('eventForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = $('evName').value.trim();
+      const eventDate = $('evDate').value;
+      const startTime = $('startTime').value ? new Date($('startTime').value).toISOString() : null;
+      const endTime = $('endTime').value ? new Date($('endTime').value).toISOString() : null;
+      const passKey = $('passKey').value.trim();
+
+      if (!name || !eventDate || !startTime || !endTime || !passKey) {
+        msg('eventMsg','Please fill all fields.','rose');
+        return;
+      }
+      if (new Date(endTime) <= new Date(startTime)) {
+        msg('eventMsg','End time must be after start time.','rose');
+        return;
+      }
+      const id = `${name.replace(/\s+/g,'-').toLowerCase()}_${eventDate}`;
+      const payload = { id, name, eventDate, startTime, endTime, passKey, createdAt: new Date().toISOString() };
+      localStorage.setItem(EVENT_KEY, JSON.stringify(payload));
+      msg('eventMsg','Event saved successfully.','emerald');
+      refreshSnapshot();
+    });
+
+    // End/Close Event
+    $('endEvent').addEventListener('click', () => {
+      const ev = JSON.parse(localStorage.getItem(EVENT_KEY) || 'null');
+      if (!ev) { msg('eventMsg','No active event to end.','rose'); return; }
+      // Set end time to past now to auto-close
+      ev.endTime = new Date(Date.now() - 1000).toISOString();
+      localStorage.setItem(EVENT_KEY, JSON.stringify(ev));
+      msg('eventMsg','Event closed. Attendance no longer accepted.','emerald');
+      refreshSnapshot();
+    });
+
+    // Change admin password
+    $('pwdForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = $('newPwd').value.trim();
+      if (v.length < 6) { msg('pwdMsg','Use at least 6 characters.','rose'); return; }
+      localStorage.setItem(ADMIN_PWD_KEY, JSON.stringify({ password: v }));
+      $('newPwd').value = '';
+      msg('pwdMsg','Password updated.','emerald');
+    });
+
+    function msg(id, text, tone='emerald') {
+      const el = $(id);
+      el.textContent = text;
+      el.className = `text-sm mt-2 text-${tone}-600`;
+    }
+  </script>
+</body>
+</html>

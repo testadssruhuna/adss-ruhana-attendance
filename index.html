@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ADSS RUHUNA – Attendance Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <!-- NAV -->
+  <header class="bg-white sticky top-0 z-10 border-b">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-extrabold text-xl tracking-tight">ADSS <span class="text-emerald-600">RUHUNA</span></a>
+      <nav>
+        <ul class="flex gap-4 text-sm font-semibold">
+          <li><a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-100">Home</a></li>
+          <li><a href="attend.html" class="px-3 py-2 rounded-md hover:bg-slate-100">Mark Attendance</a></li>
+          <li><a href="admin.html" class="px-3 py-2 rounded-md hover:bg-slate-100">Admin</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 items-center gap-10">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+          Simple, Secure <span class="text-emerald-600">Event Attendance</span>
+        </h1>
+        <p class="mt-4 text-slate-600">
+          Students mark attendance with a 5-digit index, section, and an event pass key—only within the
+          active time window. One submission per device.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="attend.html" class="inline-flex items-center px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
+            Mark Attendance
+          </a>
+          <a href="admin.html" class="inline-flex items-center px-5 py-3 rounded-xl border font-semibold hover:bg-white">
+            Admin Panel
+          </a>
+        </div>
+      </div>
+      <div class="bg-gradient-to-br from-emerald-50 to-sky-50 p-6 rounded-2xl border">
+        <div class="p-6 bg-white rounded-xl shadow-sm border">
+          <h2 class="font-bold text-lg">Current Event</h2>
+          <dl class="mt-4 space-y-2 text-sm">
+            <div class="flex justify-between"><dt class="text-slate-500">Name</dt><dd id="ev-name" class="font-semibold">—</dd></div>
+            <div class="flex justify-between"><dt class="text-slate-500">Date</dt><dd id="ev-date" class="font-semibold">—</dd></div>
+            <div class="flex justify-between"><dt class="text-slate-500">Start</dt><dd id="ev-start" class="font-semibold">—</dd></div>
+            <div class="flex justify-between"><dt class="text-slate-500">End</dt><dd id="ev-end" class="font-semibold">—</dd></div>
+            <div class="flex justify-between"><dt class="text-slate-500">Status</dt><dd id="ev-status" class="font-semibold">—</dd></div>
+          </dl>
+          <div class="mt-6 text-xs text-slate-500">
+            Tip: Admin can set the event in <span class="font-semibold">Admin Panel</span>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-6 text-sm text-slate-500">
+      © <span id="yr"></span> ADSS RUHUNA · Attendance System (Demo)
+    </div>
+  </footer>
+
+  <script>
+    const fmt = (d) => d ? new Date(d).toLocaleString() : '—';
+    const load = () => {
+      const ev = JSON.parse(localStorage.getItem('adss_current_event') || 'null');
+      document.getElementById('yr').textContent = new Date().getFullYear();
+      if (!ev) return;
+
+      const now = new Date();
+      const start = ev.startTime ? new Date(ev.startTime) : null;
+      const end   = ev.endTime ? new Date(ev.endTime) : null;
+      const open  = start && end && now >= start && now <= end;
+
+      document.getElementById('ev-name').textContent  = ev.name || '—';
+      document.getElementById('ev-date').textContent  = ev.eventDate || '—';
+      document.getElementById('ev-start').textContent = fmt(ev.startTime);
+      document.getElementById('ev-end').textContent   = fmt(ev.endTime);
+      document.getElementById('ev-status').textContent = open ? 'Open' : 'Closed';
+      document.getElementById('ev-status').className = 'font-semibold ' + (open ? 'text-emerald-600' : 'text-rose-600');
+    };
+    load();
+  </script>
+</body>
+</html>

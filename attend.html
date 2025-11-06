@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Mark Attendance · ADSS RUHUNA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="index.html" class="font-extrabold text-lg">ADSS <span class="text-emerald-600">RUHUNA</span></a>
+      <nav>
+        <ul class="flex gap-3 text-sm font-semibold">
+          <li><a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-100">Home</a></li>
+          <li><a href="attend.html" class="px-3 py-2 rounded-md bg-emerald-50 text-emerald-700">Mark Attendance</a></li>
+          <li><a href="admin.html" class="px-3 py-2 rounded-md hover:bg-slate-100">Admin</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10">
+    <div class="bg-white rounded-2xl border shadow-sm p-6">
+      <h1 class="text-xl font-bold">Event Attendance</h1>
+
+      <!-- Event banner -->
+      <div id="evBanner" class="mt-4 grid md:grid-cols-4 gap-4 text-sm">
+        <div class="p-3 rounded-lg bg-slate-50 border">
+          <div class="text-slate-500">Event</div>
+          <div id="b_name" class="font-semibold">—</div>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-50 border">
+          <div class="text-slate-500">Date</div>
+          <div id="b_date" class="font-semibold">—</div>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-50 border">
+          <div class="text-slate-500">Start</div>
+          <div id="b_start" class="font-semibold">—</div>
+        </div>
+        <div class="p-3 rounded-lg bg-slate-50 border">
+          <div class="text-slate-500">End</div>
+          <div id="b_end" class="font-semibold">—</div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div id="statusBox" class="mt-4 p-3 rounded-lg border text-sm">
+        <span id="statusText" class="font-semibold">Loading…</span>
+      </div>
+
+      <!-- Form -->
+      <form id="attForm" class="mt-6 grid md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-semibold">Section</label>
+          <select id="section" class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+            <option value="">Select section</option>
+            <option>SC/2021</option>
+            <option>SC/2022</option>
+            <option>SC/2023</option>
+            <option>SC/2024</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold">Index Number (5 digits)</label>
+          <input id="indexNum" inputmode="numeric" pattern="\\d{5}" maxlength="5" placeholder="e.g. 01234"
+                 class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+          <p class="text-xs text-slate-500 mt-1">Only digits, exactly 5.</p>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold">Pass Key</label>
+          <input id="passKey" placeholder="Event pass key"
+                 class="mt-1 w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div class="md:col-span-3 flex items-center gap-3">
+          <button class="rounded-lg bg-emerald-600 text-white font-semibold px-5 py-2.5 hover:bg-emerald-700">
+            Submit Attendance
+          </button>
+          <span id="formMsg" class="text-sm"></span>
+        </div>
+      </form>
+
+      <p class="mt-6 text-xs text-slate-500">
+        Note: This demo stores your submission on this device only (for one submission per device).
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const EVENT_KEY = 'adss_current_event';
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = (d) => d ? new Date(d).toLocaleString() : '—';
+
+    let EV = null;
+
+    function load() {
+      EV = JSON.parse(localStorage.getItem(EVENT_KEY) || 'null');
+      $('b_name').textContent = EV?.name || '—';
+      $('b_date').textContent = EV?.eventDate || '—';
+      $('b_start').textContent = fmt(EV?.startTime);
+      $('b_end').textContent = fmt(EV?.endTime);
+
+      const now = new Date();
+      const open = EV && EV.startTime && EV.endTime &&
+                   now >= new Date(EV.startTime) && now <= new Date(EV.endTime);
+
+      const statusText = EV ? (open ? 'Event is OPEN for attendance.' : 'Event is CLOSED for attendance.') : 'No event configured.';
+      $('statusText').textContent = statusText;
+      $('statusBox').className = 'mt-4 p-3 rounded-lg border text-sm ' + (open ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700');
+
+      // Disable form if closed/no event
+      Array.from(document.querySelectorAll('#attForm input, #attForm select, #attForm button')).forEach(el => {
+        el.disabled = !(EV && open);
+      });
+    }
+
+    function deviceKeyForEvent() {
+      return EV ? 'adss_marked_' + EV.id : '';
+    }
+
+    function attendanceKeyForEvent() {
+      return EV ? 'adss_attendance_' + EV.id : '';
+    }
+
+    function alreadyMarkedOnThisDevice() {
+      const k = deviceKeyForEvent();
+      return k && localStorage.getItem(k) === '1';
+    }
+
+    function markDevice() {
+      localStorage.setItem(deviceKeyForEvent(), '1');
+    }
+
+    function saveAttendance(entry) {
+      const k = attendanceKeyForEvent();
+      const list = JSON.parse(localStorage.getItem(k) || '[]');
+      list.push(entry);
+      localStorage.setItem(k, JSON.stringify(list));
+    }
+
+    $('attForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      $('formMsg').textContent = '';
+
+      if (!EV) { flash('No active event.','rose'); return; }
+
+      const now = new Date();
+      if (!(now >= new Date(EV.startTime) && now <= new Date(EV.endTime))) {
+        flash('Attendance window is closed.','rose'); return;
+      }
+
+      if (alreadyMarkedOnThisDevice()) {
+        flash('This device has already submitted attendance for this event.','rose'); return;
+      }
+
+      const section = $('section').value;
+      const indexRaw = $('indexNum').value.trim();
+      const pass = $('passKey').value.trim();
+
+      if (!section) { flash('Select your section.','rose'); return; }
+      if (!/^\d{5}$/.test(indexRaw)) { flash('Index must be exactly 5 digits.','rose'); return; }
+      if (pass !== EV.passKey) { flash('Invalid pass key.','rose'); return; }
+
+      const entry = {
+        section,
+        index: indexRaw,
+        ts: new Date().toISOString(),
+        ua: navigator.userAgent
+      };
+
+      saveAttendance(entry);
+      markDevice();
+      $('attForm').reset();
+      flash('Attendance submitted. Thank you!','emerald');
+    });
+
+    function flash(text, tone='emerald') {
+      const el = $('formMsg');
+      el.textContent = text;
+      el.className = `text-sm font-semibold text-${tone}-600`;
+    }
+
+    load();
+  </script>
+</body>
+</html>
